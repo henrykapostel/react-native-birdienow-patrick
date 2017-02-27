@@ -40,6 +40,7 @@ export default {
 
   //GlobalConstants
   global_userToken: "",
+  global_appointments_normaldata: [],
 
   // General Element Dimensions
   navbarHeight: 50,

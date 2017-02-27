@@ -8,13 +8,13 @@ import {
   Text,
   Dimensions,
   TextInput,
-  Image
+  Image,
+  TouchableOpacity
 } from 'react-native';
 var global = require('./global')
 var { width, height } = Dimensions.get('window');
 var r_width =  width / 1125;
 var r_height = height / 1659;
-var global = require('./global')
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 import StarRating from 'react-native-star-rating';
 var pageNum = 2;
@@ -38,7 +38,10 @@ module.exports = React.createClass({
     return (
       <View style={styles.container}>
         <View style={styles.topView}>
-
+          <TouchableOpacity style={{flex: 1, justifyContent: "center"}} onPress={() => {this.props.navigator.pop();}}>
+            <Text style={{textAlign: "center"}}>Back</Text>
+          </TouchableOpacity>
+          <View style={{flex: 5}}/>
         </View>
         <ScrollView>
           <View style={{flexDirection:'row', marginTop:25 * r_width,}}>
@@ -226,6 +229,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   topView:{
+    flexDirection: 'row',
     height: 189 * r_height,
     backgroundColor:'#ffffff',
     borderBottomWidth: 1,

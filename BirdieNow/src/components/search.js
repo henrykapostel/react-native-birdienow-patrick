@@ -79,8 +79,7 @@ module.exports = React.createClass({
             enableEmptySections={true}
           />
         </View>
-        <View>
-          <Image style={{width:356* r_width, height:50 * r_height}} source={require('img/searchimage/image.png')}/>
+        <View style={{height: 0, marginBottom: 50}}>
         </View>
         {this.state.showloading ?
           <View style={{position:'absolute', top:0, left:0, bottom:0, right:0, alignItems:'center', justifyContent:'center'}}>
@@ -104,14 +103,14 @@ module.exports = React.createClass({
   },
   onSearch(city){
     this.setState({city})
-    fetch('https://api.birdienow.com//api/TypeAheadSearchCity?searchString='+city
+    fetch('https://api.birdienow.com/api/TypeAheadSearchCity?searchString='+city
       +'&numResults=8')
       .then((response) => response.json())
       .then((responseData) => {
         this.setState({data:responseData})
       })
     // }else if (this.state.flag == 1) {
-    //   fetch('https://api.birdienow.com//api/TypeAheadSearchInstructor?searchString='+this.state.instuctor
+    //   fetch('https://api.birdienow.com/api/TypeAheadSearchInstructor?searchString='+this.state.instuctor
     //   +'&numResults=8')
     //   .then((response) => response.json())
     //   .then((responseData) => {

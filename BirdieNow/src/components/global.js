@@ -9,4 +9,4 @@ module.exports = {
   facitity:'',
   data:[],
   profileData:[],
-}
+};

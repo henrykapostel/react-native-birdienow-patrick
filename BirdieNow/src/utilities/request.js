@@ -98,7 +98,7 @@ export const RequestAppointmentsApi = (url, token, method = 'GET') => {
           resolve(response.json());
           // resolve(null);
         } else {
-          resolve(response.json());
+          resolve(null);
         }
       })
       .catch(error => reject(error));

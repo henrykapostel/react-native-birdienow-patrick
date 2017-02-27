@@ -12,7 +12,7 @@ import {
   Image,
   TouchableOpacity
 } from 'react-native';
-var global = require('./global')
+var global = require('./global');
 var { width, height } = Dimensions.get('window');
 var r_width =  width / 356;
 var r_height = height / 647;
@@ -60,14 +60,13 @@ module.exports = React.createClass({
               <ActivityIndicator/>
             </View>:null}
         </View>
-        <View>
-          <Image style={{width:356* r_width, height:50 * r_height}} source={require('img/searchimage/image.png')}/>
+        <View style={{height: 0, marginBottom: 50}}>
         </View>
       </View>
     );
   },
   _loadMoreContentAsync(){
-    fetch('https://api.birdienow.com//api/InstructorSearchViewModels?zip='+global.city+'&'+
+    fetch('https://api.birdienow.com/api/InstructorSearchViewModels?zip='+global.city+'&'+
       'miles=100&'+
       'gender=Any&'+
       'priceLevel=All&'+
@@ -75,14 +74,14 @@ module.exports = React.createClass({
       'numResults=8')
       .then((response) => response.json())
       .then((responseData) => {
-        var array = this.state.data
+        const array = this.state.data;
         if (responseData.length > 0) {
-          for (var i = 0; i < responseData.length; i++) {
+          for (let i = 0; i < responseData.length; i++) {
             array.push(responseData[i])
           }
         }
         this.setState({data:array})
-      })
+      });
     pageNum = pageNum+1
   },
 
