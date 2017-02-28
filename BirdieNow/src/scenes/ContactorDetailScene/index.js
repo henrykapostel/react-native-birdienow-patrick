@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { Alert, View, Image, TouchableOpacity, Text, ListView, RefreshControl, ScrollView } from 'react-native';
+import { Alert, View, Image, TouchableOpacity, Text, ListView, RefreshControl, ScrollView, PanResponder } from 'react-native';
 import styles from './styles';
 import AppConfig from 'AppConfig';
 import AppStyles from 'AppStyles';
@@ -22,6 +22,52 @@ class ContactorDetailScene extends Component {
 
     this.ListSource = [{'name':'ReviewHistory'}];
     this.state.ListDataSource = this.state.ListDataSource.cloneWithRows(this.ListSource);
+  }
+
+  componentWillMount() {
+    this._panResponder = PanResponder.create({
+      // Ask to be the responder:
+      onStartShouldSetPanResponder: (evt, gestureState) => true,
+      onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+
+      onPanResponderGrant: (evt, gestureState) => {
+        // The guesture has started. Show visual feedback so the user knows
+        // what is happening!
+
+        // gestureState.d{x,y} will be set to zero now
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // The most recent move distance is gestureState.move{X,Y}
+
+        // The accumulated gesture distance since becoming responder is
+        // gestureState.d{x,y}
+      },
+      onPanResponderTerminationRequest: (evt, gestureState) => true,
+      onPanResponderRelease: (evt, gestureState) => {
+        // The user has released all touches while this view is the
+        // responder. This typically means a gesture has succeeded
+        console.info(gestureState.dx + " " + gestureState.dy);
+        if (gestureState.dy < 20 && gestureState.dy > -20) {
+          if (gestureState.dx > 150) { //swipe left to right
+            this.props.popBack();
+          }
+          if (gestureState.dx < -150) { //swipe right to left
+
+          }
+        }
+      },
+      onPanResponderTerminate: (evt, gestureState) => {
+        // Another component has become the responder, so this gesture
+        // should be cancelled
+      },
+      onShouldBlockNativeResponder: (evt, gestureState) => {
+        // Returns whether this component should block native components from becoming the JS
+        // responder. Returns true by default. Is currently only supported on android.
+        return true;
+      },
+    });
   }
 
   componentDidMount() {
@@ -82,7 +128,7 @@ class ContactorDetailScene extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
+      <View style={styles.container} {...this._panResponder.panHandlers}>
         <View style={styles.headerContainer}>
           <View style={styles.leftImageTitleView}>
             <TouchableOpacity

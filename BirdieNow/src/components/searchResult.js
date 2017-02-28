@@ -7,9 +7,12 @@ import {
   ListView,
   Text,
   Dimensions,
+  Keyboard,
   TextInput,
   ActivityIndicator,
   Image,
+  Alert,
+  PanResponder,
   TouchableOpacity
 } from 'react-native';
 var global = require('./global');
@@ -17,6 +20,7 @@ var { width, height } = Dimensions.get('window');
 var r_width =  width / 356;
 var r_height = height / 647;
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+const ds_result = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 import StarRating from 'react-native-star-rating';
 var pageNum = 2;
 module.exports = React.createClass({
@@ -24,10 +28,163 @@ module.exports = React.createClass({
     return {
       text:'',
       data:global.data,
-      showloading: false
+      showloading: false,
+      focusFlag: false,
+
+      refreshData: [],
+      city:'',
+      instuctor:'',
+      facitity:'',
+      flag:0,
     }
   },
+  getInitialProps: function() {
+
+  },
+  componentWillMount() {
+    this.keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", this.keyboardDidShow);
+    this.keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", this.keyboardDidHide);
+    this._panResponder = PanResponder.create({
+      // Ask to be the responder:
+      onStartShouldSetPanResponder: (evt, gestureState) => true,
+      onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+
+      onPanResponderGrant: (evt, gestureState) => {
+        // The guesture has started. Show visual feedback so the user knows
+        // what is happening!
+
+        // gestureState.d{x,y} will be set to zero now
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // The most recent move distance is gestureState.move{X,Y}
+
+        // The accumulated gesture distance since becoming responder is
+        // gestureState.d{x,y}
+      },
+      onPanResponderTerminationRequest: (evt, gestureState) => true,
+      onPanResponderRelease: (evt, gestureState) => {
+        // The user has released all touches while this view is the
+        // responder. This typically means a gesture has succeeded
+        console.info(gestureState.dx + " " + gestureState.dy);
+        if (gestureState.dy < 20 && gestureState.dy > -20) {
+          if (gestureState.dx > 150) { //swipe left to right
+            this.props.navigator.pop();
+          }
+          if (gestureState.dx < -150) { //swipe right to left
+
+          }
+        }
+      },
+      onPanResponderTerminate: (evt, gestureState) => {
+        // Another component has become the responder, so this gesture
+        // should be cancelled
+      },
+      onShouldBlockNativeResponder: (evt, gestureState) => {
+        // Returns whether this component should block native components from becoming the JS
+        // responder. Returns true by default. Is currently only supported on android.
+        return true;
+      },
+    });
+  },
+
+  onSearchResult: function(rowData){
+    return(
+      <TouchableOpacity onPress={()=>this._onPressButton(rowData, true)}>
+        <View style={{height:40, alignItems:'center', borderBottomWidth:1, borderBottomColor:'#E0DEDF', flexDirection:'row'}}>
+          {this.state.flag == 0 ?
+            <Image style={{marginLeft:24 * r_width,width:22 * r_height, height:22 * r_height}} source={require('img/searchimage/locationIcon.png')}/>:null}
+          <Text style={{fontSize: 14,  color:'#2FBD96',marginLeft:5,fontFamily: 'Arial'}}>
+            {rowData.display}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    )
+  },
+  onSearch: function(city){
+    this.setState({city});
+    fetch('https://api.birdienow.com/api/TypeAheadSearchCity?searchString='+city
+      +'&numResults=8')
+      .then((response) => response.json())
+      .then((responseData) => {
+        this.setState({refreshData: responseData})
+      });
+  },
+  componentWillUnmount: function() {
+    this.keyboardDidHideListener.remove();
+    this.keyboardDidShowListener.remove();
+  },
+
+  keyboardDidShow: function(e) {
+    global.keyboardHeight = e.endCoordinates.height;
+    this.setState({focusFlag: true, text: ""});
+  },
+
+  keyboardDidHide: function(e) {
+//    global.keyboardHeight = e.endCoordinates.height;
+//    this.setState({focusFlag: false});
+  },
+
+  focusedSearch: function() {
+
+  },
+  endedSearch: function() {
+  },
   render: function() {
+    const arrayView = [];
+    arrayView.push(
+      <View key="superview" style={{position: "absolute", width: width, height: height - 50 * r_height, backgroundColor: "gray", marginTop:0, justifyContent: "center"}}>
+        <Text style={{}}>{this.state.text}</Text>
+
+        <View style={{flex:1}}>
+          <View style={{alignItems:'center', backgroundColor:'#2FBD96', borderBottomWidth:3 * r_height, borderBottomColor:'#85D3DD'}}>
+          <Text style={{marginTop:25 * r_height, fontSize:16 * r_height, color: '#000000',fontFamily: 'Arial'}}>Instructors</Text>
+          <View style={{marginTop:23,width:325 * r_width, height:25 * r_width, backgroundColor:'#ffffff',alignItems:'center', borderRadius:10,flexDirection: 'row'}}>
+          <Image style={{marginLeft:5 * r_width,width:22 * r_height, height:22 * r_height}} source={require('img/searchimage/location.png')}/>
+            <TextInput
+              placeholder="City, Zip Code"
+              style={{height: 14 * r_width,flex:1,fontSize:14,marginTop:7,marginLeft:5}}
+              onChangeText={(city) => this.onSearch(city)}
+              value={this.state.city}
+              onSubmitEditing={(event) => this._onPressButton(this.state.city, false)}
+            />
+          </View>
+        <View style={{marginTop:7,width:325 * r_width, height:25 * r_width, backgroundColor:'#ffffff',alignItems:'center', borderRadius:10,flexDirection: 'row'}}>
+        <Image style={{marginLeft:5 * r_width,width:22 * r_height, height:22 * r_height}} source={require('img/searchimage/nav-profile.png')}/>
+        <TextInput
+          placeholder="Instructor"
+          style={{height: 14 * r_width,flex:1,fontSize:14,marginTop:7,marginLeft:5}}
+          onChangeText={(instuctor) => this.setState({instuctor:instuctor, flag:1})}
+          value={this.state.instuctor}
+        />
+        </View>
+        <View style={{marginTop:7,marginBottom:7,width:325 * r_width, height:25 * r_width, backgroundColor:'#ffffff',alignItems:'center', borderRadius:10,flexDirection: 'row'}}>
+        <Image style={{marginLeft:5 * r_width,width:22 * r_height, height:22 * r_height}} source={require('img/searchimage/nav-search.png')}/>
+        <TextInput
+          placeholder="Facitity"
+          style={{height: 14 * r_width,flex:1,fontSize:14,marginTop:7,marginLeft:5}}
+          onChangeText={(facitity) => this.setState({facitity:facitity, flag:2})}
+          value={this.state.facitity}
+        />
+        </View>
+        </View>
+
+        <View style={{height:20,justifyContent:'center', backgroundColor: '#E0DEDF'}}>
+        <Text style={{marginLeft:20,fontSize:12, color: '#686868',fontFamily: 'Arial'}}>
+          LOCATIONS
+        </Text>
+        </View>
+        <ListView
+          style={{flex:1, height:500 * r_height}}
+          dataSource={ds_result.cloneWithRows(this.state.refreshData)}
+          renderRow={(rowData) =>this.onSearchResult(rowData)}
+          enableEmptySections={true}
+        />
+        </View>
+      </View>
+    );
+
     return (
       <View style={styles.container}>
         <View style={{flex:1}}>
@@ -43,18 +200,23 @@ module.exports = React.createClass({
                 placeholder="Enter text to see location"
                 style={{height: 18 * r_width,flex:1,marginTop:5, fontSize:14}}
                 onChangeText={(text) => this.setState({text})}
+                onFocus={() => {this.focusedSearch();}}
+                clearTextOnFocus={true}
                 value={this.state.text}
+                onSubmitEditing={() => {this.endedSearch();}}
               />
             </View>
           </View>
           <View style={{height:500 * r_height, backgroundColor:'#ffffff'}}>
             <ListView
+              {...this._panResponder.panHandlers}
               style={{flex:1, height:500 * r_height}}
               dataSource={ds.cloneWithRows(this.state.data)}
               renderRow={(rowData) =>this.onSherchResult(rowData)}
               onEndReached={this._loadMoreContentAsync}
             />
           </View>
+          {this.state.focusFlag ? arrayView : null}
           {this.state.showloading ?
             <View style={{position:'absolute', top:0, left:0, bottom:0, right:0, alignItems:'center', justifyContent:'center', backgroundColor:'#ffffff'}}>
               <ActivityIndicator/>
@@ -64,6 +226,59 @@ module.exports = React.createClass({
         </View>
       </View>
     );
+  },
+  _onPressButton(rowData, flag){
+    if (flag) {
+      global.city = rowData.code;
+      this.setState({showloading: true});
+      fetch('https://api.birdienow.com/api/InstructorSearchViewModels?zip='+rowData.code+'&'+
+        'miles=100&'+
+        'gender=Any&'+
+        'priceLevel=All&'+
+        'pageNum=1&'+
+        'numResults=8')
+        .then((response) => response.json())
+        .then((responseData) => {
+          this.setState({showloading:false});
+          if (responseData.length > 0) {
+            this.setState({data: responseData, focusFlag: false, text: rowData.display});
+            // global.data = responseData;
+            // this.props.navigator.push({'name': 'searchResult',
+            //   sceneConfig: {
+            //     ...Navigator.SceneConfigs.FloatFromRight,
+            //     gestures: {}
+            //   }})
+          }else{
+            alert('No Instructors near you.')
+          }
+        })
+    }else {
+      if (parseInt(rowData)) {
+        global.city = rowData;
+        this.setState({showloading: true});
+        fetch('https://api.birdienow.com/api/InstructorSearchViewModels?zip='+rowData+'&'+
+          'miles=100&'+
+          'gender=Any&'+
+          'priceLevel=All&'+
+          'pageNum=1&'+
+          'numResults=8')
+          .then((response) => response.json())
+          .then((responseData) => {
+            this.setState({showloading:false});
+            if (responseData.length > 0) {
+              this.setState({data: responseData, focusFlag: false, text: rowData.display});
+              // global.data = responseData;
+              // this.props.navigator.push({'name': 'searchResult',
+              //   sceneConfig: {
+              //     ...Navigator.SceneConfigs.FloatFromRight,
+              //     gestures: {}
+              //   }})
+            }else{
+              alert('No Instructors near you.')
+            }
+          })
+      }
+    }
   },
   _loadMoreContentAsync(){
     fetch('https://api.birdienow.com/api/InstructorSearchViewModels?zip='+global.city+'&'+
@@ -97,7 +312,7 @@ module.exports = React.createClass({
   onDistance(distance){
     var text = '';
     var anyString = 'Mozilla';
-    text = parseFloat(distance).toString().substring(0,4)
+    text = parseFloat(distance).toString().substring(0,4);
     return text
   },
   onSherchResult(rowData){
@@ -155,7 +370,8 @@ module.exports = React.createClass({
     fetch('https://api.birdienow.com/api/InstructorSearchViewModels/'+id+'?lessonTypeId=0')
       .then((response) => response.json())
       .then((responseData) => {
-        global.profileData  = responseData
+        global.insID = id;
+        global.profileData  = responseData;
         this.props.navigator.push({'name': 'profile',
           sceneConfig: {
             ...Navigator.SceneConfigs.FloatFromRight,
@@ -165,7 +381,7 @@ module.exports = React.createClass({
   }
 });
 
-var styles = StyleSheet.create({
+let styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',

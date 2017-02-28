@@ -23,7 +23,7 @@ class HomeView extends Component {
   render() {
     return (
       <View style={ styles.container }>
-        <Text>HomeView</Text>
+        <Text/>
       </View>
     );
   }

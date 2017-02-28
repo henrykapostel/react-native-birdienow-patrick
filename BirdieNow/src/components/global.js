@@ -9,4 +9,6 @@ module.exports = {
   facitity:'',
   data:[],
   profileData:[],
+  insID: '',
+  keyboardHeight: 0,
 };

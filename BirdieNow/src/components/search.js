@@ -12,12 +12,12 @@ import {
   TouchableOpacity,
   ActivityIndicator
 } from 'react-native';
-var global = require('./global')
-var { width, height } = Dimensions.get('window');
-var r_width =  width / 356;
-var r_height = height / 647;
+let global = require('./global')
+let { width, height } = Dimensions.get('window');
+let r_width =  width / 356;
+let r_height = height / 647;
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-var pageNum = 2;
+let pageNum = 2;
 module.exports = React.createClass({
   getInitialState: function() {
     return {
@@ -102,13 +102,13 @@ module.exports = React.createClass({
     )
   },
   onSearch(city){
-    this.setState({city})
+    this.setState({city});
     fetch('https://api.birdienow.com/api/TypeAheadSearchCity?searchString='+city
       +'&numResults=8')
       .then((response) => response.json())
       .then((responseData) => {
         this.setState({data:responseData})
-      })
+      });
     // }else if (this.state.flag == 1) {
     //   fetch('https://api.birdienow.com/api/TypeAheadSearchInstructor?searchString='+this.state.instuctor
     //   +'&numResults=8')
@@ -121,8 +121,8 @@ module.exports = React.createClass({
   },
   _onPressButton(rowData, flag){
     if (flag) {
-      global.city = rowData.code
-      this.setState({showloading: true})
+      global.city = rowData.code;
+      this.setState({showloading: true});
       fetch('https://api.birdienow.com/api/InstructorSearchViewModels?zip='+rowData.code+'&'+
         'miles=100&'+
         'gender=Any&'+
@@ -131,9 +131,9 @@ module.exports = React.createClass({
         'numResults=8')
         .then((response) => response.json())
         .then((responseData) => {
-          this.setState({showloading:false})
+          this.setState({showloading:false});
           if (responseData.length > 0) {
-            global.data = responseData
+            global.data = responseData;
             this.props.navigator.push({'name': 'searchResult',
               sceneConfig: {
                 ...Navigator.SceneConfigs.FloatFromRight,
@@ -145,8 +145,8 @@ module.exports = React.createClass({
         })
     }else {
       if (parseInt(rowData)) {
-        global.city = rowData
-        this.setState({showloading: true})
+        global.city = rowData;
+        this.setState({showloading: true});
         fetch('https://api.birdienow.com/api/InstructorSearchViewModels?zip='+rowData+'&'+
           'miles=100&'+
           'gender=Any&'+
@@ -155,9 +155,9 @@ module.exports = React.createClass({
           'numResults=8')
           .then((response) => response.json())
           .then((responseData) => {
-            this.setState({showloading:false})
+            this.setState({showloading:false});
             if (responseData.length > 0) {
-              global.data = responseData
+              global.data = responseData;
               this.props.navigator.push({'name': 'searchResult',
                 sceneConfig: {
                   ...Navigator.SceneConfigs.FloatFromRight,
@@ -172,7 +172,7 @@ module.exports = React.createClass({
   }
 });
 
-var styles = StyleSheet.create({
+let styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',

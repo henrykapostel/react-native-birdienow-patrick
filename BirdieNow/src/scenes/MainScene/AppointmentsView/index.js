@@ -49,25 +49,22 @@ class AppointmentsView extends Component {
   }
 
   OnRetrieveAppointments(){
+    if (AppConfig.global_freeaccount == true) {
+      return;
+    }
     this.setState({ isLoading: true });
     Appointments(AppConfig.global_userToken)
       .then((response) => {
-        console.info('haha');
         if (!response.error_description) { //success 200
           // AppConfig.global_appointments_normaldata = response;
-          console.info('muhaha');
           this.ListSource = response;
-          console.info('wahaha');
-
           this.setState({isLoading: false, ListDataSource: this.state.ListDataSource.cloneWithRows(response)});
         } else { // failed 400
-          console.info('wha');
           Alert.alert("error1");
           this.setState({ isLoading: false });
         }
       })
       .catch(error => {
-        // Alert.alert("error2");
         Alert.alert(error.message);
         // this.setState({ isLoading: false });
       });
@@ -96,6 +93,7 @@ class AppointmentsView extends Component {
       .then((response) => response.json())
       .then((responseData) => {
         global.profileData  = responseData;
+        global.insID = id;
         this.props.pushScene(profile);
       })
   }
@@ -144,43 +142,49 @@ class AppointmentsView extends Component {
   }
 
   render() {
-    return (
-      <View>
+    if (AppConfig.global_freeaccount == true) {
+      return (
+        <View/>
+      );
+    } else {
+      return (
         <View>
-          <Text style={{textAlign: 'left', fontSize: 18, color: '#000', marginLeft: 20, marginTop: 20 }}>Upcoming Appointments</Text>
-          <View
-            style={[AppStyles.row, { paddingRight: 15, marginTop:5, paddingVertical: 8, flexDirection: 'row'}]}>
-            <Text style={{ flex: 1, textAlign: 'right', color: '#000', marginRight: 10 }}>Instructor/Location</Text>
-            <Text style={{ flex: 1, textAlign: 'left', color: '#000', marginLeft: 10 }}>Date/Time</Text>
+          <View>
+            <Text style={{textAlign: 'left', fontSize: 18, color: '#000', marginLeft: 20, marginTop: 20 }}>Upcoming Appointments</Text>
+            <View
+              style={[AppStyles.row, { paddingRight: 15, marginTop:5, paddingVertical: 8, flexDirection: 'row'}]}>
+              <Text style={{ flex: 1, textAlign: 'right', color: '#000', marginRight: 10 }}>Instructor/Location</Text>
+              <Text style={{ flex: 1, textAlign: 'left', color: '#000', marginLeft: 10 }}>Date/Time</Text>
+            </View>
+            <ListView
+              enableEmptySections={true}
+              dataSource={this.state.ListDataSource_Upcoming}
+              renderRow={this.renderRow_Upcoming}/>
+            <Text style={{textAlign: 'center', fontSize: 15, color: '#000', marginLeft: 20, marginTop: 5 }}>You have no upcoming appointments</Text>
           </View>
-          <ListView
-            enableEmptySections={true}
-            dataSource={this.state.ListDataSource_Upcoming}
-            renderRow={this.renderRow_Upcoming}/>
-          <Text style={{textAlign: 'center', fontSize: 15, color: '#000', marginLeft: 20, marginTop: 5 }}>You have no upcoming appointments</Text>
-        </View>
-        <View>
-          <Text style={{textAlign: 'left', fontSize: 18, color: '#000', marginLeft: 20, marginTop: 20 }}>Past Appointments</Text>
-          <View
-            style={[AppStyles.row, { paddingRight: 15, marginTop:5, paddingVertical: 8, flexDirection: 'row'}]}>
-            <Text style={{ flex: 1, textAlign: 'right', color: '#000', marginRight: 10 }}>Instructor/Location</Text>
-            <Text style={{ flex: 1, textAlign: 'left', color: '#000', marginLeft: 10 }}>Date/Time</Text>
+          <View>
+            <Text style={{textAlign: 'left', fontSize: 18, color: '#000', marginLeft: 20, marginTop: 20 }}>Past Appointments</Text>
+            <View
+              style={[AppStyles.row, { paddingRight: 15, marginTop:5, paddingVertical: 8, flexDirection: 'row'}]}>
+              <Text style={{ flex: 1, textAlign: 'right', color: '#000', marginRight: 10 }}>Instructor/Location</Text>
+              <Text style={{ flex: 1, textAlign: 'left', color: '#000', marginLeft: 10 }}>Date/Time</Text>
+            </View>
+            <ListView
+              enableEmptySections={true}
+              dataSource={this.state.ListDataSource}
+              renderRow={this.renderRow}/>
           </View>
-          <ListView
-            enableEmptySections={true}
-            dataSource={this.state.ListDataSource}
-            renderRow={this.renderRow}/>
+          {this.state.isLoading ?
+            <View style={styles.loadingScene}>
+              <ActivityIndicator
+                animating={true}
+                size="large"
+                color="white"
+              />
+            </View> : null}
         </View>
-        {this.state.isLoading ?
-          <View style={styles.loadingScene}>
-            <ActivityIndicator
-              animating={true}
-              size="large"
-              color="white"
-            />
-          </View> : null}
-      </View>
-    );
+      );
+    }
   }
 }
 

@@ -98,6 +98,7 @@ class MainScene extends Component {
           tabBarPosition="overlayBottom"
           tabBarActiveTextColor={AppConfig.secondaryColor}
           tabBarInactiveTextColor="#909090"
+          locked={true}
           tabBarUnderlineStyle={{ backgroundColor: '#fff' }}
         >
           <HomeView tabLabel="1"/>

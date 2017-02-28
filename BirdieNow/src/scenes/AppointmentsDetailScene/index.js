@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { Alert, View, Image, TouchableOpacity, Text, ListView, RefreshControl, ScrollView, TextInput } from 'react-native';
+import { Alert, View, Image, TouchableOpacity, Text, ListView, RefreshControl, ScrollView, TextInput, PanResponder } from 'react-native';
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
 import StarRating from 'react-native-star-rating';
 import { CheckboxField, Checkbox } from 'react-native-checkbox-field';
@@ -10,7 +10,6 @@ import { SearchBar, HeaderBar } from 'AppComponents';
 import { FilterScene, ListDetailScene, } from 'AppScenes';
 import { RequestApi, MakeCancelable, GlobalStorage } from 'AppUtilities';
 import _, { isEqual } from 'lodash';
-import Dimensions from 'Dimensions';
 
 class AppointmentsDetailScene extends Component {
   static propTypes = {
@@ -44,7 +43,8 @@ class AppointmentsDetailScene extends Component {
       checkBox7Label: 'Chipping',
       currentText: ''
     };
-    // Alert.alert(AppConfig.global_userToken);
+
+    //functions
     this.onStarRatingPress = this.onStarRatingPress.bind(this);
     this.selectCheckbox1 = this.selectCheckbox1.bind(this);
     this.selectCheckbox2 = this.selectCheckbox2.bind(this);
@@ -55,6 +55,52 @@ class AppointmentsDetailScene extends Component {
     this.selectCheckbox7 = this.selectCheckbox7.bind(this);
     this.onChangeTextField = this.onChangeTextField.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+  }
+
+  componentWillMount() {
+    this._panResponder = PanResponder.create({
+      // Ask to be the responder:
+      onStartShouldSetPanResponder: (evt, gestureState) => true,
+      onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+
+      onPanResponderGrant: (evt, gestureState) => {
+        // The guesture has started. Show visual feedback so the user knows
+        // what is happening!
+
+        // gestureState.d{x,y} will be set to zero now
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // The most recent move distance is gestureState.move{X,Y}
+
+        // The accumulated gesture distance since becoming responder is
+        // gestureState.d{x,y}
+      },
+      onPanResponderTerminationRequest: (evt, gestureState) => true,
+      onPanResponderRelease: (evt, gestureState) => {
+        // The user has released all touches while this view is the
+        // responder. This typically means a gesture has succeeded
+        console.info(gestureState.dx + " " + gestureState.dy);
+        if (gestureState.dy < 20 && gestureState.dy > -20) {
+          if (gestureState.dx > 150) { //swipe left to right
+            this.props.popBack();
+          }
+          if (gestureState.dx < -150) { //swipe right to left
+
+          }
+        }
+      },
+      onPanResponderTerminate: (evt, gestureState) => {
+        // Another component has become the responder, so this gesture
+        // should be cancelled
+      },
+      onShouldBlockNativeResponder: (evt, gestureState) => {
+        // Returns whether this component should block native components from becoming the JS
+        // responder. Returns true by default. Is currently only supported on android.
+        return true;
+      },
+    });
   }
 
   onStarRatingPress(rating) {
@@ -148,7 +194,7 @@ class AppointmentsDetailScene extends Component {
         </View>
         <View style={{height: 5}}/>
 
-        <ScrollView>
+        <ScrollView {...this._panResponder.panHandlers}>
           <Text style={{fontSize: 18, color: "black", marginLeft: 20, marginTop: 20}}>REVIEW: Derrick</Text>
           <Text style={{fontSize: 13, color: "black", marginLeft: 20, marginTop: 5}}>Lesson on: Sat, Fab 25, 2017 9:00 AM - 10:00 AM</Text>
           <Image source={require('img/image/photo.png')} style={{ width: 100, height: 100, marginLeft: 30, marginTop: 10}} />

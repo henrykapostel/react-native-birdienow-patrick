@@ -8,6 +8,7 @@ import {
   Text,
   Dimensions,
   TextInput,
+  PanResponder,
   Image,
   TouchableOpacity
 } from 'react-native';
@@ -26,13 +27,56 @@ module.exports = React.createClass({
     }
   },
   componentDidMount(){
-
-
-    fetch('https://api.birdienow.com/api/InstructorSearchViewModels/165639?lessonTypeId=0')
+    fetch('https://api.birdienow.com/api/InstructorSearchViewModels/' + global.insID + '?lessonTypeId=0')
       .then((response) => response.json())
       .then((responseData) => {
         this.setState({data:responseData})
       })
+  },
+  componentWillMount() {
+    this._panResponder = PanResponder.create({
+      // Ask to be the responder:
+      onStartShouldSetPanResponder: (evt, gestureState) => true,
+      onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+
+      onPanResponderGrant: (evt, gestureState) => {
+        // The guesture has started. Show visual feedback so the user knows
+        // what is happening!
+
+        // gestureState.d{x,y} will be set to zero now
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // The most recent move distance is gestureState.move{X,Y}
+
+        // The accumulated gesture distance since becoming responder is
+        // gestureState.d{x,y}
+      },
+      onPanResponderTerminationRequest: (evt, gestureState) => true,
+      onPanResponderRelease: (evt, gestureState) => {
+        // The user has released all touches while this view is the
+        // responder. This typically means a gesture has succeeded
+        console.info(gestureState.dx + " " + gestureState.dy);
+        if (gestureState.dy < 20 && gestureState.dy > -20) {
+          if (gestureState.dx > 150) { //swipe left to right
+            this.props.navigator.pop();
+          }
+          if (gestureState.dx < -150) { //swipe right to left
+
+          }
+        }
+      },
+      onPanResponderTerminate: (evt, gestureState) => {
+        // Another component has become the responder, so this gesture
+        // should be cancelled
+      },
+      onShouldBlockNativeResponder: (evt, gestureState) => {
+        // Returns whether this component should block native components from becoming the JS
+        // responder. Returns true by default. Is currently only supported on android.
+        return true;
+      },
+    });
   },
   render: function() {
     return (
@@ -43,7 +87,7 @@ module.exports = React.createClass({
           </TouchableOpacity>
           <View style={{flex: 5}}/>
         </View>
-        <ScrollView>
+        <ScrollView {...this._panResponder.panHandlers}>
           <View style={{flexDirection:'row', marginTop:25 * r_width,}}>
             <Image
               style={{width: 249 * r_width, height: 249 * r_width, borderRadius:123 * r_width, marginLeft:36 * r_width}}

@@ -75,11 +75,25 @@ class LoginScene extends Component {
           </TouchableHighlight>
 
           <TouchableHighlight
-            onPress={this.OnSignIn}
+            onPress={() => {
+              AppConfig.global_freeaccount = false;
+              this.OnSignIn();
+            }}
+            style={{ marginRight: 10 }}
             underlayColor="#bde7ff" >
             <Text style={styles.btnLogin}>LOGIN</Text>
           </TouchableHighlight>
+
+          <TouchableHighlight
+            onPress={() => {
+              AppConfig.global_freeaccount = true;
+              this.props.pushScene(MainScene);
+            }}
+            underlayColor="#bde7ff">
+            <Text style={styles.btnLogin}>Free</Text>
+          </TouchableHighlight>
         </View>
+
         {this.state.isLoading ?
           <View style={styles.loadingScene}>
             <ActivityIndicator
